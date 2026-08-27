@@ -3987,24 +3987,35 @@ window.__initBGM = function (src) {
   paint();
 
   /* ── 들어오는 순간부터 음악을 켭니다 ──
-     소리 있는 자동재생은 브라우저가 막는 경우가 있어 세 단계로 시도합니다.
-       1) 소리와 함께 바로 재생
-       2) 막히면 음소거로라도 재생을 걸어 둡니다 (곡이 이미 흐르는 상태)
-       3) 첫 조작(오프닝을 탭하는 것까지 포함)에서 소리를 켭니다        */
+     소리 있는 자동재생은 브라우저(크롬·사파리·카톡 인앱)가 한결같이 막습니다.
+     화면을 한 번 건드리기 전에는 소리를 낼 수 없으므로 이렇게 합니다.
+       1) 우선 소리와 함께 걸어봅니다 (허용하는 브라우저면 여기서 끝)
+       2) 막히면 음소거로 재생해 음원을 미리 받아 둡니다
+       3) 첫 손길(오프닝 탭·참석여부 버튼 무엇이든)에 처음부터 소리를 냅니다
+     2단계에서 버퍼를 채워두기 때문에 3단계에서 기다림 없이 바로 울립니다.   */
   const GESTURES = ['pointerdown','touchstart','click','keydown','wheel'];
   function disarm(){ GESTURES.forEach(e => document.removeEventListener(e, kick, true)); }
   function kick(){
     if (!wanted) { disarm(); return; }
     au.muted = false;                       /* 조작 안에서 호출해야 통과합니다 */
+    if (au.currentTime > 0.1) { try { au.currentTime = 0; } catch (e) {} }  /* 곡 첫머리부터 */
     au.play().then(() => { if (audible()) disarm(); }).catch(() => {});
   }
   function arm(){ GESTURES.forEach(e => document.addEventListener(e, kick, true)); }
 
+  /* 음소거 재생도 데이터가 도착하기 전에는 거절당할 수 있어 몇 번 더 두드립니다 */
+  function warm(){
+    if (!wanted || audible()) return;
+    au.muted = true;
+    au.play().catch(() => {});
+  }
+
   if (wanted) {
     au.muted = false;
     au.play().catch(() => {
-      au.muted = true;                      /* 음소거 재생은 대개 허용됩니다 */
-      au.play().catch(() => {});
+      warm();
+      au.addEventListener('canplay', warm);
+      au.addEventListener('loadeddata', warm);
       arm();
     });
   }
