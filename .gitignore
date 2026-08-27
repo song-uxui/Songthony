@@ -1,0 +1,7 @@
+# 작업용 옛날 단일파일 백업 — 용량이 커서 깃에는 올리지 않습니다
+.mine/
+invitation.html
+
+# 맥 · 에디터 부스러기
+.DS_Store
+node_modules/
