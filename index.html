@@ -3441,6 +3441,13 @@ setInterval(tickDday, 1000);
 
   /* 모드 전환 — 사진이 있던 자리에서 새 자리로 움직이며 퍼집니다 (FLIP) */
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 보기 방식이 바뀌면 사진 높이가 달라져 보던 자리가 어긋납니다 — 갤러리 맨 위로 올려줍니다
+     (자리 재기가 다 끝난 뒤에 불러야 FLIP 계산이 스크롤에 밀리지 않습니다) */
+  function toGalleryTop(){
+    const sec = document.querySelector('.sec-gallery');
+    if (sec) sec.scrollIntoView({block: 'start'});
+  }
   function setMode(next){
     if (next === mode) return;
     const first = new Map();
@@ -3452,7 +3459,7 @@ setInterval(tickDday, 1000);
     layout(true);
     document.querySelectorAll('#galToggle button').forEach(btn =>
       btn.classList.toggle('on', btn.dataset.mode === mode));
-    if (reduce) return;
+    if (reduce) { toGalleryTop(); return; }
     items.forEach(b => {
       const f = first.get(b), l = b.getBoundingClientRect();
       if (!f || !f.width || !l.width) return;
@@ -3462,6 +3469,7 @@ setInterval(tickDday, 1000);
       b.style.transformOrigin = 'top left';
       b.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
     });
+    toGalleryTop();
     requestAnimationFrame(() => {
       items.forEach((b, i) => {
         b.style.transition =
@@ -3551,8 +3559,10 @@ setInterval(tickDday, 1000);
     const sec = gal.closest('section') || gal;
     const sync = () => {
       const r = sec.getBoundingClientRect();
-      const seen = r.top < window.innerHeight * 0.85 && r.bottom > window.innerHeight * 0.25;
-      toggle.classList.toggle('is-on', seen);
+      /* 버튼이 떠 있는 높이를 갤러리가 지나는 동안에만 보입니다 —
+         갤러리를 벗어나면 다음 섹션 위에 남지 않고 사라집니다 */
+      const line = window.innerHeight - 56;
+      toggle.classList.toggle('is-on', r.top < line && r.bottom > line);
     };
     sync();
     window.addEventListener('scroll', sync, { passive: true });
@@ -4675,7 +4685,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const GKEY = 'invite-guestbook-v1';     /* 서버 주소가 없을 때 쓰는 이 기기 보관함 */
   const MAX  = 24;                        /* 종이 한 장에 붙일 스티커 수 */
   const PAGE = 6;                         /* 벽에 한 번에 보이는 장수 */
-  let cat = 3, sel = 0, pIdx = 0;         /* 처음엔 비즈 스티커 · 노란 보드 */
+  let cat = 0, sel = 0, pIdx = 0;         /* 처음엔 알파벳 스티커 · 노란 보드 */
   let placed = [];                        /* 붙인 스티커 */
   let strokes = [];                       /* 펜으로 그린 선 */
   let hist = [];                          /* 되돌리기 순서 ('st' | 'ink') */
