@@ -1559,6 +1559,8 @@ html.rsvp-lock,html.rsvp-lock body{overflow:hidden;height:100%;}
 .bead-rows{
   display:block;
   width:calc(100% + 104px);     /* 카드보다 넓게 — 비즈가 더 크게 보입니다 */
+  max-width:none;               /* 바깥에서 img{max-width:100%} 를 걸어도 폭이 줄지 않게 */
+  background:#ECE8E4;           /* 사진 배경이 투명합니다 — 섹션과 같은 색을 깔아둡니다 */
   height:auto;
   margin:0 -52px 4px;           /* 좌우는 카드 밖으로 (카드가 잘라줍니다) */
   transform:translateY(-60px);  /* 그림만 위로 — 아래 글씨·달력은 원래 자리 그대로 */
@@ -2320,6 +2322,17 @@ html.rsvp-lock,html.rsvp-lock body{overflow:hidden;height:100%;}
   filter:drop-shadow(0 7px 12px rgba(0,0,0,.45));
   cursor:grabbing;
 }
+
+/* 고인이신 혼주 성함 앞의 국화꽃 (꽃잎을 직접 그렸습니다) */
+.parents .late{
+  width:1.14em;
+  height:1.14em;
+  margin-right:.2em;
+  vertical-align:-.18em;
+  display:inline-block;
+  flex:0 0 auto;
+  opacity:.82;                 /* 이름보다 도드라지지 않게 */
+}
 </style>
 
 
@@ -2624,8 +2637,8 @@ html.rsvp-lock,html.rsvp-lock body{overflow:hidden;height:100%;}
 
 <!-- 갤러리 보기 전환 — 화면 아래 가운데 고정 (카드 밖에 두어야 고정이 정확합니다) -->
 <div class="gal-toggle" id="galToggle" role="group" aria-label="갤러리 보기 방식">
-  <button type="button" data-mode="group" class="on">컨셉별</button>
-  <button type="button" data-mode="grid">격자</button>
+  <button type="button" data-mode="group">컨셉별</button>
+  <button type="button" data-mode="grid" class="on">격자</button>
   <button type="button" data-mode="pile">사진 더미</button>
 </div>
 <!-- 방명록 크게 보기 -->
@@ -2647,6 +2660,7 @@ const CONFIG = {
     name: '김찬호',
     firstName: '찬호',
     father: '김영수', mother: '박미경',   // 혼주 성함으로 바꿔주세요
+    fatherLate: true,                    // 고인이신 혼주 : 이름 앞에 국화꽃을 붙입니다
     order: '아들',                       // 장남/차남/아들 등
   },
   bride: {
@@ -2792,7 +2806,6 @@ const CONFIG = {
     'images/g63.webp',
     'images/g64.webp',
     'images/g65.webp',
-    'images/g66.webp',
   ],
 
   // ── 갤러리 컨셉 묶음 (두 번째 모드) ──
@@ -2800,12 +2813,12 @@ const CONFIG = {
   galleryGroups: [
     { label: '⋆ ˚｡⋆ ❀ ⋆｡˚ ⋆', from: 1, to: 5 },
     { label: '･ﾟ✧ ☽ ✧ﾟ･', from: 6, to: 11 },
-    { label: '✧･ﾟ ♡ ﾟ･✧', from: 12, to: 21 },
-    { label: '⋆ ✦ ｡ ✦ ⋆', from: 22, to: 25 },
-    { label: '☁ ⋆｡˚ ☁', from: 26, to: 33 },
-    { label: '˚ ⋆ ☀ ⋆ ˚', from: 34, to: 47 },
-    { label: '❀ ⋅ ✿ ⋅ ❀', from: 48, to: 62 },
-    { label: '♡ ⋆｡˚ ♡', from: 63, to: 66 },
+    { label: '✧･ﾟ ♡ ﾟ･✧', from: 12, to: 20 },
+    { label: '⋆ ✦ ｡ ✦ ⋆', from: 21, to: 24 },
+    { label: '☁ ⋆｡˚ ☁', from: 25, to: 32 },
+    { label: '˚ ⋆ ☀ ⋆ ˚', from: 33, to: 46 },
+    { label: '❀ ⋅ ✿ ⋅ ❀', from: 47, to: 61 },
+    { label: '♡ ⋆｡˚ ♡', from: 62, to: 65 },
   ],
 
 
@@ -3042,9 +3055,16 @@ function playHeroLetters(){
 /* ── 인사말 + 혼주 ── */
 $('inviteMsg').textContent = CONFIG.inviteMessage;
 const BABY = CONFIG.babyPhotos || {groom:{}, bride:{}};
+/* 고인이신 혼주는 성함 앞에 국화꽃을 붙입니다 */
+const CHRYS = '<img class="late" src="images/flower-late.webp" alt="" role="img" aria-label="고인" loading="lazy">';
+const lateMark = who => who ? CHRYS : '';
+const groomFa = lateMark(CONFIG.groom.fatherLate) + CONFIG.groom.father;
+const groomMo = lateMark(CONFIG.groom.motherLate) + CONFIG.groom.mother;
+const brideFa = lateMark(CONFIG.bride.fatherLate) + CONFIG.bride.father;
+const brideMo = lateMark(CONFIG.bride.motherLate) + CONFIG.bride.mother;
 $('parents').innerHTML = `
   <div class="row">
-    <span class="who">${CONFIG.groom.father} · ${CONFIG.groom.mother}의 ${CONFIG.groom.order}</span>
+    <span class="who">${groomFa} · ${groomMo}의 ${CONFIG.groom.order}</span>
     <span class="rel">신랑</span>
     <span class="name">${CONFIG.groom.firstName}</span>
     <img class="baby" src="${BABY.groom.heart}" data-full="${BABY.groom.full || BABY.groom.heart}"
@@ -3052,7 +3072,7 @@ $('parents').innerHTML = `
          role="button" tabindex="0" loading="lazy">
   </div>
   <div class="row">
-    <span class="who">${CONFIG.bride.father} · ${CONFIG.bride.mother}의 ${CONFIG.bride.order}</span>
+    <span class="who">${brideFa} · ${brideMo}의 ${CONFIG.bride.order}</span>
     <span class="rel">신부</span>
     <span class="name">${CONFIG.bride.firstName}</span>
     <img class="baby" src="${BABY.bride.heart}" data-full="${BABY.bride.full || BABY.bride.heart}"
@@ -3213,7 +3233,7 @@ setInterval(tickDday, 1000);
   });
 
   /* ── 보기 모드 : 'pile'(사진 더미) · 'group'(컨셉별 단락) ── */
-  let mode = 'group';                /* 기본은 컨셉별 단락 */
+  let mode = 'grid';                 /* 기본은 격자(아이폰 사진 앱) */
   let lastW = -1, lastMode = null;
   const pan = { x: 0, y: 0 };                       /* 더미를 끌어 옮긴 양 */
   const stage = document.createElement('div');      /* 더미를 통째로 움직이는 판 */
@@ -4229,7 +4249,13 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   if (!opt.enabled) { intro.remove(); playHeroLetters(); openRsvp(); return; }
 
   var SCENE = {"W":1080,"H":1920,"pieces":[{"t":0,"sx":25,"sy":75,"sw":333,"sh":188,"w":707,"h":401,"mode":"blob","sd":1592229741,"x":151.7,"y":-58.2,"r":-10.8,"layer":0,"tx":-2209.7,"ty":-1934.4,"tr":-67.2,"ts":0.692,"d":2.25,"dur":1.16},{"t":5,"sx":20,"sy":0,"sw":432,"sh":467,"w":905,"h":980,"mode":"clip","sd":16538931,"x":-207.5,"y":14.7,"r":18.5,"layer":0,"tx":-747.6,"ty":-2087.9,"tr":-63.9,"ts":0.791,"d":2.13,"dur":1.35},{"t":2,"sx":19,"sy":175,"sw":422,"sh":208,"w":919,"h":455,"mode":"shard","sd":1659375458,"x":83.1,"y":628.3,"r":17.1,"layer":0,"tx":618.0,"ty":-2036.5,"tr":31.4,"ts":0.801,"d":2.0,"dur":0.97},{"t":1,"sx":44,"sy":81,"sw":427,"sh":179,"w":776,"h":326,"mode":"wave","sd":1436282377,"x":-4.0,"y":1018.1,"r":3.8,"layer":0,"tx":-1024.1,"ty":2224.4,"tr":7.4,"ts":0.777,"d":2.1,"dur":1.21},{"t":4,"sx":33,"sy":145,"sw":362,"sh":510,"w":950,"h":1339,"mode":"bite","sd":408509321,"x":279.5,"y":724.2,"r":-1.7,"layer":0,"tx":1537.0,"ty":2323.8,"tr":43.1,"ts":0.892,"d":2.17,"dur":1.34},{"t":3,"sx":9,"sy":292,"sw":468,"sh":346,"w":858,"h":635,"mode":"fold","sd":438711406,"x":535.2,"y":1431.7,"r":1.6,"layer":0,"tx":1536.8,"ty":2571.3,"tr":44.0,"ts":0.849,"d":2.29,"dur":1.21},{"t":0,"sx":136,"sy":305,"sw":343,"sh":264,"w":748,"h":577,"mode":"blob","sd":1848529621,"x":-228.1,"y":-147.1,"r":-10.7,"layer":1,"tx":-1252.5,"ty":-1461.8,"tr":-133.2,"ts":0.76,"d":2.51,"dur":1.2},{"t":2,"sx":65,"sy":469,"sw":365,"sh":145,"w":582,"h":232,"mode":"clip","sd":1447081920,"x":249.8,"y":131.1,"r":18.7,"layer":1,"tx":1530.0,"ty":-2013.9,"tr":-12.1,"ts":0.826,"d":2.38,"dur":1.14},{"t":1,"sx":217,"sy":10,"sw":301,"sh":654,"w":707,"h":1537,"mode":"shard","sd":57322633,"x":558.3,"y":-540.9,"r":24.4,"layer":1,"tx":1089.3,"ty":-2166.4,"tr":-7.2,"ts":0.787,"d":2.44,"dur":0.96},{"t":4,"sx":4,"sy":14,"sw":474,"sh":284,"w":688,"h":413,"mode":"wave","sd":2094314231,"x":-179.1,"y":401.5,"r":-9.3,"layer":1,"tx":-833.2,"ty":-2076.7,"tr":-4.6,"ts":0.702,"d":2.22,"dur":1.32},{"t":5,"sx":105,"sy":169,"sw":404,"sh":521,"w":621,"h":801,"mode":"bite","sd":25670595,"x":177.7,"y":148.4,"r":18.4,"layer":1,"tx":-601.7,"ty":-1978.8,"tr":-101.4,"ts":0.736,"d":2.15,"dur":1.28},{"t":0,"sx":44,"sy":505,"sw":451,"sh":151,"w":719,"h":242,"mode":"fold","sd":314783559,"x":563.2,"y":484.3,"r":-11.2,"layer":1,"tx":1057.1,"ty":-2310.5,"tr":-163.9,"ts":0.765,"d":2.24,"dur":1.15},{"t":5,"sx":11,"sy":63,"sw":293,"sh":463,"w":702,"h":1110,"mode":"clip","sd":471209491,"x":-181.2,"y":351.4,"r":19.5,"layer":1,"tx":-1213.1,"ty":-1727.3,"tr":-112.4,"ts":0.933,"d":2.12,"dur":1.21},{"t":4,"sx":115,"sy":329,"sw":374,"sh":324,"w":549,"h":477,"mode":"blob","sd":794145379,"x":235.2,"y":683.8,"r":-15.9,"layer":1,"tx":-852.0,"ty":-1602.3,"tr":-128.8,"ts":0.751,"d":1.89,"dur":0.96},{"t":1,"sx":5,"sy":31,"sw":277,"sh":623,"w":750,"h":1687,"mode":"blob","sd":1557093992,"x":496.6,"y":156.7,"r":9.2,"layer":1,"tx":1756.9,"ty":1356.1,"tr":9.4,"ts":0.694,"d":2.05,"dur":1.13},{"t":3,"sx":90,"sy":20,"sw":324,"sh":481,"w":658,"h":977,"mode":"clip","sd":316674453,"x":-188.1,"y":905.7,"r":-19.2,"layer":1,"tx":-1119.2,"ty":1375.6,"tr":-113.8,"ts":0.747,"d":2.28,"dur":1.17},{"t":2,"sx":90,"sy":17,"sw":390,"sh":525,"w":716,"h":965,"mode":"shard","sd":194806118,"x":231.3,"y":803.6,"r":-22.2,"layer":1,"tx":560.2,"ty":1690.3,"tr":-32.6,"ts":0.869,"d":2.07,"dur":1.31},{"t":3,"sx":11,"sy":1,"sw":205,"sh":437,"w":571,"h":1218,"mode":"wave","sd":1796963464,"x":598.7,"y":733.9,"r":7.4,"layer":1,"tx":911.0,"ty":2037.3,"tr":112.8,"ts":0.936,"d":2.25,"dur":0.99},{"t":4,"sx":112,"sy":0,"sw":351,"sh":302,"w":710,"h":611,"mode":"bite","sd":452174255,"x":-236.9,"y":1412.7,"r":20.2,"layer":1,"tx":-804.4,"ty":2071.8,"tr":53.8,"ts":0.798,"d":2.44,"dur":0.99},{"t":5,"sx":6,"sy":516,"sw":369,"sh":176,"w":743,"h":356,"mode":"fold","sd":1392830928,"x":221.3,"y":1499.6,"r":19.3,"layer":1,"tx":1166.8,"ty":1654.6,"tr":23.7,"ts":0.931,"d":2.32,"dur":1.24},{"t":1,"sx":39,"sy":523,"sw":444,"sh":172,"w":755,"h":293,"mode":"clip","sd":117280933,"x":535.1,"y":1532.3,"r":-22.2,"layer":1,"tx":943.0,"ty":1989.5,"tr":50.0,"ts":0.91,"d":2.42,"dur":0.98},{"t":2,"sx":27,"sy":277,"sw":484,"sh":412,"w":551,"h":470,"mode":"blob","sd":2084268316,"x":-267.6,"y":-195.5,"r":13.2,"layer":2,"tx":-879.2,"ty":-2290.5,"tr":132.9,"ts":0.687,"d":2.67,"dur":1.21},{"t":0,"sx":117,"sy":22,"sw":389,"sh":142,"w":545,"h":200,"mode":"blob","sd":1451175814,"x":57.8,"y":-149.2,"r":-16.0,"layer":2,"tx":-2127.9,"ty":-701.8,"tr":70.8,"ts":0.868,"d":2.6,"dur":1.13},{"t":5,"sx":179,"sy":49,"sw":339,"sh":553,"w":471,"h":769,"mode":"clip","sd":1974617072,"x":442.9,"y":-380.5,"r":1.9,"layer":2,"tx":1960.9,"ty":-1554.5,"tr":-167.6,"ts":0.844,"d":2.6,"dur":1.19},{"t":1,"sx":37,"sy":314,"sw":382,"sh":182,"w":616,"h":294,"mode":"shard","sd":1585072483,"x":723.7,"y":-188.5,"r":-2.6,"layer":2,"tx":1900.5,"ty":-357.0,"tr":56.2,"ts":0.874,"d":2.7,"dur":1.11},{"t":0,"sx":21,"sy":155,"sw":469,"sh":314,"w":519,"h":348,"mode":"wave","sd":1211822859,"x":-259.8,"y":252.1,"r":-4.0,"layer":2,"tx":-493.7,"ty":-2073.2,"tr":60.3,"ts":0.716,"d":2.43,"dur":1.0},{"t":2,"sx":16,"sy":0,"sw":240,"sh":502,"w":469,"h":981,"mode":"bite","sd":42423489,"x":117.5,"y":-116.7,"r":-6.7,"layer":2,"tx":-726.6,"ty":-1692.4,"tr":-0.1,"ts":0.761,"d":2.3,"dur":1.1},{"t":4,"sx":7,"sy":44,"sw":274,"sh":628,"w":578,"h":1326,"mode":"fold","sd":2055780384,"x":444.9,"y":-319.7,"r":26.4,"layer":2,"tx":1154.3,"ty":-1584.0,"tr":41.2,"ts":0.925,"d":2.28,"dur":1.2},{"t":3,"sx":172,"sy":417,"sw":340,"sh":269,"w":602,"h":478,"mode":"clip","sd":1793992863,"x":787.0,"y":112.3,"r":-15.0,"layer":2,"tx":717.6,"ty":-2101.0,"tr":-140.9,"ts":0.92,"d":2.4,"dur":1.05},{"t":5,"sx":34,"sy":4,"sw":381,"sh":169,"w":594,"h":264,"mode":"blob","sd":2075101956,"x":-286.1,"y":681.8,"r":10.3,"layer":2,"tx":-1047.3,"ty":-1872.3,"tr":166.0,"ts":0.747,"d":2.27,"dur":0.97},{"t":0,"sx":105,"sy":553,"sw":376,"sh":134,"w":531,"h":190,"mode":"blob","sd":1098667356,"x":49.9,"y":678.5,"r":20.6,"layer":2,"tx":-997.9,"ty":-1656.5,"tr":95.7,"ts":0.8,"d":2.02,"dur":0.97},{"t":4,"sx":289,"sy":193,"sw":206,"sh":507,"w":589,"h":1452,"mode":"clip","sd":1614728789,"x":436.1,"y":6.9,"r":28.0,"layer":2,"tx":880.8,"ty":-1956.8,"tr":-133.6,"ts":0.735,"d":2.08,"dur":1.02},{"t":3,"sx":127,"sy":137,"sw":371,"sh":236,"w":536,"h":342,"mode":"shard","sd":1001301761,"x":788.8,"y":646.5,"r":0.4,"layer":2,"tx":1442.2,"ty":-1828.6,"tr":-151.3,"ts":0.836,"d":2.2,"dur":1.35},{"t":1,"sx":110,"sy":202,"sw":328,"sh":155,"w":633,"h":300,"mode":"wave","sd":337015360,"x":-266.7,"y":964.1,"r":29.8,"layer":2,"tx":-1176.7,"ty":2228.8,"tr":66.5,"ts":0.857,"d":2.19,"dur":1.24},{"t":2,"sx":149,"sy":42,"sw":367,"sh":218,"w":642,"h":383,"mode":"bite","sd":1023151794,"x":59.5,"y":1005.6,"r":13.7,"layer":2,"tx":-1066.7,"ty":1573.7,"tr":-29.5,"ts":0.731,"d":2.09,"dur":1.14},{"t":2,"sx":10,"sy":203,"sw":469,"sh":465,"w":497,"h":493,"mode":"fold","sd":1378797023,"x":445.2,"y":916.6,"r":27.3,"layer":2,"tx":989.6,"ty":1699.8,"tr":145.4,"ts":0.785,"d":1.99,"dur":0.97},{"t":5,"sx":15,"sy":435,"sw":418,"sh":261,"w":629,"h":394,"mode":"clip","sd":725954478,"x":719.8,"y":941.6,"r":25.6,"layer":2,"tx":1345.7,"ty":1990.5,"tr":191.2,"ts":0.695,"d":2.23,"dur":1.15},{"t":1,"sx":172,"sy":3,"sw":344,"sh":260,"w":575,"h":435,"mode":"blob","sd":2109292008,"x":-270.1,"y":1327.5,"r":0.7,"layer":2,"tx":-903.2,"ty":1747.5,"tr":-93.5,"ts":0.857,"d":2.45,"dur":1.32},{"t":4,"sx":169,"sy":5,"sw":331,"sh":125,"w":471,"h":178,"mode":"blob","sd":1759356269,"x":152.0,"y":1405.7,"r":23.2,"layer":2,"tx":-877.8,"ty":1656.4,"tr":-112.0,"ts":0.697,"d":2.27,"dur":1.2},{"t":3,"sx":56,"sy":5,"sw":445,"sh":190,"w":453,"h":194,"mode":"clip","sd":763083749,"x":478.2,"y":1475.4,"r":9.8,"layer":2,"tx":1158.1,"ty":1844.9,"tr":167.7,"ts":0.713,"d":2.29,"dur":1.06},{"t":0,"sx":2,"sy":12,"sw":343,"sh":195,"w":642,"h":366,"mode":"shard","sd":1658746478,"x":767.4,"y":1348.1,"r":23.1,"layer":2,"tx":167.3,"ty":1984.0,"tr":113.6,"ts":0.879,"d":2.45,"dur":1.14},{"t":5,"sx":167,"sy":38,"sw":349,"sh":629,"w":562,"h":1013,"mode":"wave","sd":267412586,"x":-290.8,"y":1462.1,"r":-14.0,"layer":2,"tx":-1288.4,"ty":-1836.3,"tr":-76.6,"ts":0.882,"d":2.72,"dur":1.13},{"t":1,"sx":12,"sy":6,"sw":291,"sh":527,"w":498,"h":903,"mode":"bite","sd":260402991,"x":118.4,"y":1420.3,"r":-8.1,"layer":2,"tx":-1523.7,"ty":1062.5,"tr":-80.0,"ts":0.754,"d":2.55,"dur":1.0},{"t":3,"sx":171,"sy":136,"sw":348,"sh":558,"w":493,"h":791,"mode":"fold","sd":1804470223,"x":503.4,"y":1507.4,"r":-25.6,"layer":2,"tx":1239.7,"ty":1357.2,"tr":-143.9,"ts":0.874,"d":2.52,"dur":1.0},{"t":2,"sx":56,"sy":20,"sw":459,"sh":202,"w":642,"h":283,"mode":"clip","sd":1454090411,"x":752.4,"y":1749.8,"r":28.2,"layer":2,"tx":378.8,"ty":2192.4,"tr":114.1,"ts":0.789,"d":2.67,"dur":1.1},{"t":4,"sx":63,"sy":293,"sw":450,"sh":198,"w":376,"h":166,"mode":"clip","sd":1072814347,"x":621.6,"y":-10.8,"r":12.0,"layer":2,"tx":2129.1,"ty":-1313.4,"tr":-50.6,"ts":0.728,"d":2.56,"dur":1.08},{"t":0,"sx":22,"sy":230,"sw":297,"sh":433,"w":399,"h":582,"mode":"wave","sd":2052042065,"x":168.8,"y":-254.5,"r":-4.1,"layer":2,"tx":-1439.7,"ty":-1351.6,"tr":100.1,"ts":0.856,"d":2.54,"dur":1.24},{"t":2,"sx":78,"sy":32,"sw":327,"sh":148,"w":443,"h":201,"mode":"blob","sd":842366682,"x":794.7,"y":1037.7,"r":13.2,"layer":2,"tx":1437.9,"ty":1786.2,"tr":-63.8,"ts":0.809,"d":2.19,"dur":1.02},{"t":0,"sx":16,"sy":2,"sw":441,"sh":310,"w":453,"h":319,"mode":"fold","sd":2071354546,"x":-195.0,"y":1554.5,"r":27.3,"layer":2,"tx":-663.2,"ty":2234.5,"tr":85.0,"ts":0.873,"d":2.53,"dur":1.24},{"t":4,"sx":134,"sy":540,"sw":383,"sh":133,"w":402,"h":140,"mode":"clip","sd":44429951,"x":837.5,"y":1759.9,"r":-26.4,"layer":2,"tx":1163.5,"ty":1623.5,"tr":-160.2,"ts":0.757,"d":2.56,"dur":1.19},{"t":1,"sx":122,"sy":307,"sw":363,"sh":318,"w":510,"h":448,"mode":"blob","sd":80522661,"x":-172.4,"y":-116.6,"r":25.6,"layer":2,"tx":-784.5,"ty":-1638.2,"tr":18.2,"ts":0.899,"d":2.58,"dur":0.96}],"slots":[{"w":193.5,"h":210.8,"x":85.7,"y":614.9,"r":0.1,"d":0.3,"o":1.78},{"w":241.2,"h":221.1,"x":297.2,"y":609.9,"r":-5.7,"d":0.39,"o":1.82},{"w":262.2,"h":290.8,"x":556.4,"y":587.5,"r":-7.4,"d":0.47,"o":1.86},{"w":157.7,"h":214.5,"x":836.6,"y":606.5,"r":6.9,"d":0.55,"o":1.91},{"w":176.3,"h":186.2,"x":451.8,"y":876.5,"r":-4.3,"d":0.64,"o":1.95},{"w":133.7,"h":137.3,"x":48.4,"y":1154.4,"r":5.7,"d":0.73,"o":1.99},{"w":197.4,"h":141.4,"x":194.1,"y":1147.0,"r":2.3,"d":0.81,"o":2.03},{"w":83.5,"h":139.2,"x":403.4,"y":1166.0,"r":-4.7,"d":0.9,"o":2.07},{"w":112.5,"h":137.8,"x":499.0,"y":1153.3,"r":-2.6,"d":0.98,"o":2.12},{"w":114.8,"h":137.4,"x":623.5,"y":1167.3,"r":4.8,"d":1.06,"o":2.16},{"w":145.9,"h":153.8,"x":750.3,"y":1151.8,"r":4.9,"d":1.15,"o":2.2},{"w":123.4,"h":137.5,"x":908.3,"y":1153.1,"r":-5.8,"d":1.24,"o":2.24}]};
-  SCENE.tiles = [0,1,2,3,4,5].map(function(i){ return 'images/intro/tile' + i + '.webp'; });
+  /* 경로를 이어붙이면 한 파일로 묶을 때 그림이 빠집니다 — 통째로 씁니다 */
+  SCENE.tiles = ['images/intro/tile0.webp','images/intro/tile1.webp','images/intro/tile2.webp',
+                 'images/intro/tile3.webp','images/intro/tile4.webp','images/intro/tile5.webp'];
+  var LTR = ['images/intro/ltr0.webp','images/intro/ltr1.webp','images/intro/ltr2.webp',
+             'images/intro/ltr3.webp','images/intro/ltr4.webp','images/intro/ltr5.webp',
+             'images/intro/ltr6.webp','images/intro/ltr7.webp','images/intro/ltr8.webp',
+             'images/intro/ltr9.webp','images/intro/ltr10.webp','images/intro/ltr11.webp'];
 
   /* 글자 조각은 첫 화면(히어로)에 붙은 것을 그대로 가져옵니다 */
   function heroSrcs(el){
@@ -4243,7 +4269,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     .concat(heroSrcs(document.getElementById('heroBottom')).slice(0, 7));
   SCENE.letters = SCENE.slots.map(function(s, i){
     return {w:s.w, h:s.h, x:s.x, y:s.y, r:s.r, d:s.d, o:s.o,
-            src: picked[i] || 'images/intro/ltr' + i + '.webp'};
+            src: picked[i] || LTR[i] || LTR[0]};
   });
 
   /* 히어로 조각은 가로세로비가 다르므로 원래 자리 안에 비율을 지켜 앉힙니다 */
